@@ -16,7 +16,7 @@ const httpServer = createServer(function(request, response) {
 
 const socket = new WebSocket.Server({
   server: httpServer,
-  port: 5000,
+  port: Number(process.env.SOCKET_PORT || 5000),
   path: '/'
 });
 
@@ -26,21 +26,16 @@ function handleConnection(connection) {
   connection.id = uid();
   connection.on('close', () => console.log(`${connection.id} disconnected.`));
   connection.on('message', function(message) {
-    let target = '';
-
-    if (message[0] === '@') {
-      target = String(message).slice(1, 65);
-    }
-
     const relayMessage = `${connection.id} ${message}`;
+    const target = message[0] === '@' ? String(message).slice(1, 65) : '';
+    const clients = Array.from(socket.clients)
+      .filter(client => client !== connection && (!target || target === client.id));
 
-    socket.clients.forEach(client => {
-      if (client !== connection && (!target || target === client.id)) {
-        console.log(`${client.id} > ${message}`);
-        client.send(relayMessage);
-      }
+    clients.forEach(client => {
+      console.log(`${Date.now()} ${client.id} ${message}`);
+      client.send(relayMessage);
     });
   });
 }
 
-httpServer.listen(80);
+httpServer.listen(Number(process.env.HTTP_PORT || 80));
