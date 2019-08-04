@@ -32,10 +32,12 @@ function handleConnection(connection) {
       target = String(message).slice(1, 65);
     }
 
+    const relayMessage = `${connection.id} ${message}`;
+
     socket.clients.forEach(client => {
       if (client !== connection && (!target || target === client.id)) {
         console.log(`${client.id} > ${message}`);
-        client.send(message);
+        client.send(relayMessage);
       }
     });
   });
