@@ -1,0 +1,12 @@
+{
+  "name": "@homebots/relay",
+  "version": "0.0.1",
+  "description": "WebSockets relay",
+  "main": "index.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "ws": "^7.1.1"
+  }
+}
