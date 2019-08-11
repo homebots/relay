@@ -15,7 +15,7 @@ const uid = () => {
 const log = (...args) => process.env.DEBUG ? console.log(...args) : '';
 
 const httpServer = (useSSL ? https : http).createServer(function(request, response) {
-  if (request.url === '/') {
+  if (request.url === '/status') {
     const list = Array.from(socket.clients).map(client => client.id);
     response.end(JSON.stringify(list));
   }
@@ -55,5 +55,4 @@ function handleConnection(connection) {
 
 socket.on('connection', handleConnection);
 httpServer.listen(httpPort);
-
 console.log(`[${Date.now()}] relay running at ${httpPort}, ${socketPort}`);
