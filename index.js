@@ -1,9 +1,11 @@
-const { createServer } = require('https');
+const http = require('http');
+const https = require('https');
 const WebSocket = require('ws');
 const crypto = require('crypto');
 
-const httpPort = process.env.HTTP_PORT || 443;
-const socketPort = process.env.SOCKET_PORT || 3000;
+const httpPort = Number(process.env.HTTP_PORT || 80);
+const socketPort = Number(process.env.SOCKET_PORT || 3000);
+const useSSL = Boolean(process.env.SLL);
 
 const uid = () => {
   const seed = crypto.randomBytes(32);
@@ -12,7 +14,7 @@ const uid = () => {
 
 const log = (...args) => process.env.DEBUG ? console.log(...args) : '';
 
-const httpServer = createServer(function(request, response) {
+const httpServer = (useSSL ? https : http).createServer(function(request, response) {
   if (request.url === '/') {
     const list = Array.from(socket.clients).map(client => client.id);
     response.end(JSON.stringify(list));
@@ -24,7 +26,7 @@ const httpServer = createServer(function(request, response) {
 
 const socket = new WebSocket.Server({
   server: httpServer,
-  port: Number(socketPort),
+  port: socketPort,
   path: '/hub'
 });
 
