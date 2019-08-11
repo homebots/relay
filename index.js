@@ -1,12 +1,14 @@
-const { createServer } = require('http');
+const { createServer } = require('https');
 const WebSocket = require('ws');
 const crypto = require('crypto');
+
+const httpPort = process.env.HTTP_PORT || 443;
+const socketPort = process.env.SOCKET_PORT || 3000;
 
 const uid = () => {
   const seed = crypto.randomBytes(32);
   return crypto.createHash('sha256').update(seed).digest('hex').slice(0, 7);
 }
-
 
 const log = (...args) => process.env.DEBUG ? console.log(...args) : '';
 
@@ -22,8 +24,8 @@ const httpServer = createServer(function(request, response) {
 
 const socket = new WebSocket.Server({
   server: httpServer,
-  port: Number(process.env.SOCKET_PORT || 5000),
-  path: '/relay'
+  port: Number(socketPort),
+  path: '/hub'
 });
 
 const nullOrigin = { id: '0000000' };
@@ -50,4 +52,6 @@ function handleConnection(connection) {
 }
 
 socket.on('connection', handleConnection);
-httpServer.listen(Number(process.env.HTTP_PORT || 80));
+httpServer.listen(httpPort);
+
+console.log(`[${Date.now()}] relay running at ${httpPort}, ${socketPort}`);
