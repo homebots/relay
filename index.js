@@ -18,6 +18,14 @@ const httpServer = (useSSL ? https : http).createServer(function(request, respon
   if (request.url === '/status') {
     const list = Array.from(socket.clients).map(client => client.id);
     response.end(JSON.stringify(list));
+    return;
+  }
+
+  if (request.url.slice(0, 7) === '/c/sha1') {
+    const input = request.url.slice(8);
+    const hash = crypto.createHash('sha256').update(input).digest('hex');
+    response.end(hash);
+    return;
   }
 
   response.writeHead(404, 'Not found');
