@@ -38,27 +38,39 @@ const socket = new WebSocket.Server({
   path: '/hub'
 });
 
-const nullOrigin = { id: '0000000' };
+// const nullOrigin = { id: '0000000' };
+
 function broadcast(origin, message) {
-  const relayMessage = `${origin.id} ${message}`;
-  const target = message[0] === '@' ? String(message).slice(1, 65) : '';
-  const clients = Array.from(socket.clients)
-    .filter(client => client !== origin && (!target || target === client.id));
+  const bytes = typeof message !== 'string' ? message.toString('hex') : message;
+  const clients = Array.from(socket.clients).filter(client => client !== origin);
+
+  log(`FROM ${origin.id} ${message.length}: ${bytes}`);
 
   clients.forEach(client => {
-    log(`${Date.now()} ${client.id} ${message}`);
-    client.send(relayMessage);
+    if (client.textOnly) {
+      log(`TO ${client.id} ${bytes}`);
+      client.send(bytes);
+      return;
+    }
+
+    log(`TO ${client.id} #${message.length}`);
+    client.send(message);
   });
 }
 
 function handleConnection(connection) {
   connection.id = uid();
-  connection.on('close', () => broadcast(nullOrigin, `-${connection.id}`));
+  // connection.on('close', () => broadcast(nullOrigin, `-${connection.id}`));
   connection.on('message', function(message) {
+    if (message === 'text') {
+      connection.textOnly = true;
+      return;
+    }
+
     broadcast(connection, message);
   });
 
-  broadcast(nullOrigin, `+${connection.id}`)
+  // broadcast(nullOrigin, `+${connection.id}`)
 }
 
 socket.on('connection', handleConnection);
