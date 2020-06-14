@@ -1,13 +1,14 @@
 const http = require('http');
+const https = require('https');
 const WebSocket = require('ws');
 const crypto = require('crypto');
 const Url = require('url');
 
 const httpPort = Number(process.env.HTTP_PORT || 80);
 const socketPort = Number(process.env.SOCKET_PORT || 3000);
+const useSsl = !!process.env.SSL;
 const relayMap = new Map();
-
-const socketServer = http.createServer();
+const socketServer = (useSsl ? https : http).createServer();
 
 const uid = () => {
   const seed = crypto.randomBytes(32);
