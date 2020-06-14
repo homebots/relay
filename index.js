@@ -54,7 +54,7 @@ const httpServer = http.createServer(function(request, response) {
 
 socketServer.on('upgrade', function (request, socket, head) {
   const pathname = Url.parse(request.url).pathname;
-  const sessionId = pathname.slice(1);
+  const sessionId = pathname.slice(5);
 
   if (!sessionId) {
     socket.destroy();
