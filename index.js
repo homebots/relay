@@ -7,6 +7,7 @@ const Url = require('url');
 const httpPort = Number(process.env.HTTP_PORT || 80);
 const socketPort = Number(process.env.SOCKET_PORT || 3000);
 const useSsl = !!process.env.SSL;
+const debugEnabled = !!process.env.DEBUG;
 const relayMap = new Map();
 const socketServer = (useSsl ? https : http).createServer();
 
@@ -15,7 +16,7 @@ const uid = () => {
   return crypto.createHash('sha256').update(seed).digest('hex');
 }
 
-const log = (...args) => process.env.DEBUG ? console.log(...args) : '';
+const log = (...args) => debugEnabled && console.log(`[${new Date().toISOString()}]`, ...args);
 
 const httpServer = http.createServer(function(request, response) {
   response.setHeader('Access-Control-Allow-Origin', '*');
@@ -30,6 +31,7 @@ const httpServer = http.createServer(function(request, response) {
   }
 
   if (request.url === '/reset') {
+    log('Resetting sockets');
     relayMap.forEach(socket => socket.close());
     relayMap.clear();
     response.end('OK');
@@ -61,6 +63,7 @@ socketServer.on('upgrade', function (request, socket, head) {
     return;
   }
 
+  log(`New client in ${sessionId}`);
   let relay = relayMap.get(sessionId);
 
   if (!relay) {
@@ -76,18 +79,16 @@ socketServer.on('upgrade', function (request, socket, head) {
 });
 
 function broadcast(origin, message) {
-  const hexMessage = typeof message !== 'string' ? message.toString('hex') : message;
   const sessionId = origin.id;
   const socket = relayMap.get(sessionId);
 
-  // || Array.from(socket.clients).length === 1
-  if (!socket) return;
+  if (!socket || socket.clients.size) return;
 
-  const clients = Array.from(socket.clients).filter(client => client !== origin);
+  const hexMessage = typeof message !== 'string' ? message.toString('hex') : message;
 
-  log(`FROM ${origin.id} ${message.length}: ${hexMessage}`);
+  socket.clients.forEach(client => {
+    if (client === origin) return;
 
-  clients.forEach(client => {
     if (client.textOnly) {
       log(`TO ${client.id} ${hexMessage}`);
       client.send(hexMessage);
@@ -111,9 +112,10 @@ function handleNewClient(socket) {
 }
 
 function cleanup() {
-  relayMap.forEach((value, key) => {
-    if (!value.clients.size) {
-      value.close();
+  relayMap.forEach((relay, key) => {
+    if (!relay.clients.size) {
+      log(`Deleting stale session ${relay.id}`);
+      relay.close();
       relayMap.delete(key);
     }
   });
