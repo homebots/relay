@@ -7,7 +7,6 @@ const Url = require('url');
 const httpPort = Number(process.env.HTTP_PORT || 80);
 const socketPort = Number(process.env.SOCKET_PORT || 3000);
 const useSsl = !!process.env.SSL;
-const debugEnabled = !!process.env.DEBUG;
 const relayMap = new Map();
 const socketServer = (useSsl ? https : http).createServer();
 
@@ -16,7 +15,7 @@ const uid = () => {
   return crypto.createHash('sha256').update(seed).digest('hex');
 }
 
-const log = (...args) => debugEnabled && console.log(`[${new Date().toISOString()}]`, ...args);
+const log = (...args) => console.log(`[${new Date().toISOString()}]`, ...args);
 
 const httpServer = http.createServer(function(request, response) {
   response.setHeader('Access-Control-Allow-Origin', '*');
