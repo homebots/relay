@@ -86,7 +86,7 @@ function broadcast(origin, message) {
   const hexMessage = typeof message !== 'string' ? message.toString('hex') : message;
 
   socket.clients.forEach(client => {
-    if (client === origin) return;
+    if (client === origin || client.readyState !== WebSocket.OPEN) return;
 
     if (client.textOnly) {
       log(`TO ${client.id} ${hexMessage}`);
