@@ -81,7 +81,7 @@ function broadcast(origin, message) {
   const sessionId = origin.id;
   const socket = relayMap.get(sessionId);
 
-  if (!socket || socket.clients.size) return;
+  if (!socket || socket.clients.size < 2) return;
 
   const hexMessage = typeof message !== 'string' ? message.toString('hex') : message;
 
