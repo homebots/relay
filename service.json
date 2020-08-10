@@ -1,6 +1,5 @@
 {
-  "domain": "hub.homebots.io",
   "webSocket": {
-    "path": "hub"
+    "path": ""
   }
 }
