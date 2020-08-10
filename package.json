@@ -3,9 +3,9 @@
   "version": "0.0.1",
   "description": "WebSockets relay",
   "main": "index.js",
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": ["websocket"],
+  "author": "Darlan Alves <me@darlanalv.es>",
+  "license": "MIT",
   "dependencies": {
     "ws": "^7.1.1"
   },
