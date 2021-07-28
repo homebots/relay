@@ -1,5 +1,6 @@
 {
   "domain": "hub.homebots.io",
+  "httpsRedirect": false,
   "webSocket": {
     "path": "hub"
   }
