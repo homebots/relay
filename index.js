@@ -1,17 +1,21 @@
-const http = require("http");
-const WebSocket = require("ws");
-const crypto = require("crypto");
+import http from "http";
+import crypto from "crypto";
+import WebSocket from "ws";
 
 const port = Number(process.env.PORT);
 const relayMap = new Map();
 const socketServer = http.createServer();
 
+const log = (...args) => console.log(`[${new Date().toISOString()}]`, ...args);
 const uid = () =>
   crypto.createHash("sha256").update(crypto.randomBytes(32)).digest("hex");
-const log = (...args) => console.log(`[${new Date().toISOString()}]`, ...args);
+
+socketServer.on("request", (request) =>
+  console.log(request.url, request.method)
+);
 
 socketServer.on("upgrade", function (request, socket, head) {
-  const pathname = new URL(request.url, "http://localhost").pathname;
+  const pathname = new URL(String(request.url), "http://localhost").pathname;
   const sessionId = pathname.slice(1);
 
   if (!sessionId) {
@@ -84,6 +88,4 @@ socketServer.listen(port);
 
 setInterval(cleanup, 5000);
 
-console.log(
-  `[${new Date().toISOString()}] relay running at ${httpPort}, socks at ${port}`
-);
+console.log(`[${new Date().toISOString()}] relay running at ${port}`);
