@@ -85,7 +85,5 @@ function cleanup() {
 }
 
 socketServer.listen(port);
-
 setInterval(cleanup, 5000);
-
 console.log(`[${new Date().toISOString()}] relay running at ${port}`);
