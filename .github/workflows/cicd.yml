@@ -1,0 +1,14 @@
+on:
+  push:
+    branches:
+    - main
+
+
+jobs:
+  build:
+    uses: cloud-cli/workflows/.github/workflows/docker-ghcr-build.yml@main
+    with:
+      name: homebots/relay
+      baseImage: cloud-cli/node:latest
+      defaultBranch: main
+      type: node
